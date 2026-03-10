@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LECTIO" />
+  <title>LECTIO — Uni Podcasts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Didact+Gothic&family=IM+Fell+English:ital@1&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f7f4ef;
+      --cream: #ede9e1;
+      --gold: #b8966a;
+      --gold-light: #d4b483;
+      --mid: #6b6560;
+      --light-line: #d9d4ca;
+      --player-bg: #111;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'Didact Gothic', sans-serif;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ─── MASTHEAD ─── */
+    header {
+      background: var(--black);
+      padding: 18px 20px 14px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .masthead-eyebrow {
+      font-family: 'Didact Gothic', sans-serif;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .masthead-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 12vw, 52px);
+      font-weight: 300;
+      letter-spacing: 14px;
+      color: var(--white);
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .masthead-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 11px;
+      color: var(--mid);
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    /* ─── UPLOAD ZONE ─── */
+    .upload-section {
+      padding: 28px 20px 0;
+    }
+
+    .section-label {
+      font-size: 8px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--light-line);
+    }
+
+    .upload-zone {
+      border: 1px dashed var(--light-line);
+      border-radius: 2px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--gold);
+      background: rgba(184,150,106,0.04);
+    }
+
+    .upload-icon {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 12px;
+      opacity: 0.35;
+    }
+
+    .upload-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--black);
+      margin-bottom: 4px;
+    }
+
+    .upload-hint {
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.5px;
+    }
+
+    #fileInput { display: none; }
+
+    /* ─── PODCAST GRID ─── */
+    .library-section {
+      padding: 28px 20px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+    .empty-state p {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: var(--mid);
+    }
+
+    .podcast-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .podcast-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--light-line);
+      cursor: pointer;
+      gap: 14px;
+      transition: background 0.2s;
+    }
+    .podcast-item:first-child {
+      border-top: 1px solid var(--light-line);
+    }
+    .podcast-item:active {
+      background: rgba(184,150,106,0.06);
+    }
+    .podcast-item.active-item .item-title {
+      color: var(--gold);
+    }
+    .podcast-item.active-item .item-num {
+      color: var(--gold);
+    }
+
+    .item-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--light-line);
+      width: 24px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .item-cover {
+      width: 48px;
+      height: 48px;
+      border-radius: 1px;
+      background: var(--black);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .item-cover-letter {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--gold);
+    }
+    .item-cover-wave {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 14px;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .item-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--black);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .item-meta {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--mid);
+      text-transform: uppercase;
+    }
+
+    .item-play-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--light-line);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .item-play-btn:hover {
+      border-color: var(--gold);
+    }
+    .item-play-btn svg { width: 12px; height: 12px; fill: var(--mid); }
+    .podcast-item.active-item .item-play-btn {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .podcast-item.active-item .item-play-btn svg { fill: var(--black); }
+
+    .item-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      flex-shrink: 0;
+      opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+    .item-delete:hover { opacity: 0.8; }
+    .item-delete svg { width: 14px; height: 14px; stroke: var(--black); }
+
+    /* ─── PLAYER ─── */
+    .player-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--player-bg);
+      border-top: 1px solid #222;
+      padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+      z-index: 200;
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .player-bar.hidden {
+      transform: translateY(100%);
+    }
+
+    .player-now-label {
+      font-size: 8px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .player-track-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 12px;
+    }
+
+    .player-progress-wrap {
+      position: relative;
+      height: 2px;
+      background: #2a2a2a;
+      border-radius: 1px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .player-progress-fill {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 1px;
+      width: 0%;
+      transition: width 0.3s linear;
+      pointer-events: none;
+    }
+    .player-progress-thumb {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      left: 0%;
+      pointer-events: none;
+    }
+
+    .player-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--mid);
+      margin-bottom: 14px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      transition: opacity 0.2s;
+    }
+    .ctrl-btn:active { opacity: 0.6; }
+    .ctrl-btn svg { fill: #888; width: 22px; height: 22px; }
+    .ctrl-btn.primary { 
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .ctrl-btn.primary svg { fill: var(--black); width: 20px; height: 20px; }
+
+    .speed-btn {
+      background: none;
+      border: 1px solid #333;
+      color: #888;
+      border-radius: 20px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-family: 'Didact Gothic', sans-serif;
+      transition: all 0.2s;
+    }
+    .speed-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ─── SPACER for player ─── */
+    .player-spacer {
+      height: 160px;
+    }
+
+    /* ─── SCROLL MARQUEE ─── */
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ─── LOADING ANIM ─── */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    .loading-dot {
+      display: inline-block;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: pulse 1.2s ease-in-out infinite;
+      margin: 0 2px;
+    }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Waveform animation when playing */
+    @keyframes wave1 { 0%,100%{height:3px} 50%{height:10px} }
+    @keyframes wave2 { 0%,100%{height:6px} 50%{height:3px} }
+    @keyframes wave3 { 0%,100%{height:9px} 50%{height:4px} }
+    .waveform { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+    .waveform span {
+      width: 2px;
+      background: var(--gold);
+      border-radius: 1px;
+    }
+    .waveform.playing span:nth-child(1) { animation: wave1 0.8s ease-in-out infinite; }
+    .waveform.playing span:nth-child(2) { animation: wave2 0.8s ease-in-out infinite 0.1s; }
+    .waveform.playing span:nth-child(3) { animation: wave3 0.8s ease-in-out infinite 0.2s; }
+    .waveform span:nth-child(1) { height: 4px; }
+    .waveform span:nth-child(2) { height: 8px; }
+    .waveform span:nth-child(3) { height: 5px; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: var(--black);
+      color: var(--white);
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 10px 20px;
+      border-radius: 2px;
+      border: 1px solid var(--gold);
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 300;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── MEDIA QUERY ─── */
+    @media (min-width: 640px) {
+      header { padding: 22px 40px 18px; }
+      .upload-section, .library-section { padding-left: 40px; padding-right: 40px; max-width: 680px; margin: 0 auto; }
+      .player-bar { max-width: 680px; left: 50%; transform: translateX(-50%); border-radius: 2px 2px 0 0; }
+      .player-bar.hidden { transform: translateX(-50%) translateY(100%); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header>
+  <div class="masthead-eyebrow">Universität · Podcast Bibliothek</div>
+  <div class="masthead-title">LECTIO</div>
+  <div class="masthead-sub">Wissen für unterwegs</div>
+</header>
+
+<!-- UPLOAD -->
+<div class="upload-section">
+  <div class="section-label">Neue Episode</div>
+  <div class="upload-zone" id="uploadZone">
+    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="#b8966a" stroke-width="1.2">
+      <path d="M12 15V3m0 0L8 7m4-4l4 4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/>
+    </svg>
+    <div class="upload-headline">Audio-Datei hinzufügen</div>
+    <div class="upload-hint">MP3, M4A, WAV, OGG · Tippen oder Ziehen</div>
+    <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.m4a,.wav,.ogg,.aac,.mp4,.flac" multiple />
+  </div>
+</div>
+
+<!-- LIBRARY -->
+<div class="library-section">
+  <div class="section-label">Bibliothek</div>
+  <div id="emptyState" class="empty-state">
+    <p>Deine Podcast-Episoden erscheinen hier.</p>
+  </div>
+  <div class="podcast-list" id="podcastList"></div>
+</div>
+
+<div class="player-spacer" id="playerSpacer" style="display:none"></div>
+
+<!-- PLAYER BAR -->
+<div class="player-bar hidden" id="playerBar">
+  <div class="player-now-label">Jetzt läuft</div>
+  <div class="player-track-name" id="playerTrackName">—</div>
+
+  <div class="player-progress-wrap" id="progressWrap">
+    <div class="player-progress-fill" id="progressFill"></div>
+    <div class="player-progress-thumb" id="progressThumb"></div>
+  </div>
+  <div class="player-times">
+    <span id="timeElapsed">0:00</span>
+    <span id="timeDuration">0:00</span>
+  </div>
+
+  <div class="player-controls">
+    <button class="ctrl-btn" id="prevBtn" title="Vorherige Episode">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+    </button>
+    <button class="ctrl-btn" id="rewindBtn" title="-15s">
+      <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="7" y="15.5" font-size="5.5" fill="currentColor" font-family="sans-serif" stroke="none">15</text></svg>
+    </button>
+    <button class="ctrl-btn primary" id="playPauseBtn">
+      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="ctrl-btn" id="forwardBtn" title="+30s">
+      <svg viewBox="0 0 24 24"><path d="M18 13c0 3.31-2.69 6-6 6s-6-2.69-6-6 2.69-6 6-6v4l5-5-5-5v4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8h-2z"/><text x="8" y="15.5" font-size="5.5" fill="currentColor" font-family="sans-serif" stroke="none">30</text></svg>
+    </button>
+    <button class="ctrl-btn" id="nextBtn" title="Nächste Episode">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+    </button>
+  </div>
+  <div style="display:flex;justify-content:center;margin-top:12px;gap:8px;">
+    <button class="speed-btn" id="speedBtn">1.0×</button>
+    <button class="speed-btn" id="sleepBtn">Sleep</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AUDIO ELEMENT -->
+<audio id="audioPlayer" preload="metadata"></audio>
+
+<script>
+  // ── State ──
+  let tracks = JSON.parse(localStorage.getItem('lectio_tracks') || '[]');
+  let currentIndex = -1;
+  let isPlaying = false;
+  let speeds = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+  let speedIdx = 1;
+  let sleepTimer = null;
+  let objectURLs = {};
+
+  const audio = document.getElementById('audioPlayer');
+  const playerBar = document.getElementById('playerBar');
+  const playerTrackName = document.getElementById('playerTrackName');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const playIcon = document.getElementById('playIcon');
+  const progressFill = document.getElementById('progressFill');
+  const progressThumb = document.getElementById('progressThumb');
+  const timeElapsed = document.getElementById('timeElapsed');
+  const timeDuration = document.getElementById('timeDuration');
+  const podcastList = document.getElementById('podcastList');
+  const emptyState = document.getElementById('emptyState');
+  const playerSpacer = document.getElementById('playerSpacer');
+  const speedBtn = document.getElementById('speedBtn');
+  const toastEl = document.getElementById('toast');
+
+  // ── Restore blob URLs from IndexedDB ──
+  const DB_NAME = 'lectio_audio', DB_STORE = 'files', DB_VER = 1;
+  let db;
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VER);
+      req.onupgradeneeded = e => e.target.result.createObjectStore(DB_STORE);
+      req.onsuccess = e => { db = e.target.result; resolve(db); };
+      req.onerror = reject;
+    });
+  }
+
+  async function saveFile(id, file) {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(file, id);
+    return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+  }
+
+  async function loadFile(id) {
+    return new Promise((res, rej) => {
+      const tx = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(id);
+      req.onsuccess = e => res(e.target.result);
+      req.onerror = rej;
+    });
+  }
+
+  async function deleteFile(id) {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).delete(id);
+  }
+
+  async function init() {
+    await openDB();
+    // Restore object URLs
+    for (const track of tracks) {
+      const file = await loadFile(track.id);
+      if (file) {
+        objectURLs[track.id] = URL.createObjectURL(file);
+      }
+    }
+    renderList();
+  }
+
+  // ── Format time ──
+  function fmt(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  // ── Toast ──
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  // ── Render list ──
+  function renderList() {
+    podcastList.innerHTML = '';
+    emptyState.style.display = tracks.length === 0 ? 'block' : 'none';
+
+    tracks.forEach((track, i) => {
+      const item = document.createElement('div');
+      item.className = 'podcast-item' + (i === currentIndex ? ' active-item' : '');
+      item.dataset.index = i;
+
+      const letter = track.name.charAt(0).toUpperCase();
+      const isActive = i === currentIndex;
+
+      item.innerHTML = `
+        <div class="item-num">${String(i + 1).padStart(2, '0')}</div>
+        <div class="item-cover">
+          <div class="item-cover-letter">${letter}</div>
+          ${isActive ? `<svg class="item-cover-wave" viewBox="0 0 48 14" preserveAspectRatio="none">
+            <rect x="4" y="8" width="4" height="6" fill="#b8966a" opacity="0.6" rx="1"/>
+            <rect x="12" y="4" width="4" height="10" fill="#b8966a" opacity="0.8" rx="1"/>
+            <rect x="20" y="6" width="4" height="8" fill="#b8966a" rx="1"/>
+            <rect x="28" y="2" width="4" height="12" fill="#b8966a" opacity="0.9" rx="1"/>
+            <rect x="36" y="7" width="4" height="7" fill="#b8966a" opacity="0.7" rx="1"/>
+          </svg>` : ''}
+        </div>
+        <div class="item-info">
+          <div class="item-title">${track.name}</div>
+          <div class="item-meta">${track.durationStr || 'Audio'}</div>
+        </div>
+        <button class="item-play-btn" data-index="${i}" aria-label="Abspielen">
+          ${isActive && isPlaying
+            ? `<svg viewBox="0 0 24 24" style="fill:#0a0a0a"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+            : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`
+          }
+        </button>
+        <button class="item-delete" data-id="${track.id}" aria-label="Löschen">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+          </svg>
+        </button>
+      `;
+      podcastList.appendChild(item);
+    });
+  }
+
+  // ── Load & play track ──
+  async function loadTrack(index, autoplay = true) {
+    if (index < 0 || index >= tracks.length) return;
+    currentIndex = index;
+    const track = tracks[index];
+
+    let url = objectURLs[track.id];
+    if (!url) {
+      const file = await loadFile(track.id);
+      if (file) { url = URL.createObjectURL(file); objectURLs[track.id] = url; }
+    }
+    if (!url) { showToast('Datei nicht gefunden'); return; }
+
+    audio.src = url;
+    audio.playbackRate = speeds[speedIdx];
+    playerTrackName.textContent = track.name;
+    playerBar.classList.remove('hidden');
+    playerSpacer.style.display = 'block';
+
+    if (autoplay) {
+      audio.play().then(() => {
+        isPlaying = true;
+        updatePlayIcon();
+        renderList();
+        updateMediaSession(track);
+      }).catch(() => {});
+    } else {
+      renderList();
+    }
+  }
+
+  function updatePlayIcon() {
+    playIcon.innerHTML = isPlaying
+      ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+      : '<path d="M8 5v14l11-7z"/>';
+  }
+
+  // ── Media Session API (for background / lock screen) ──
+  function updateMediaSession(track) {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.name,
+        artist: 'LECTIO',
+        album: 'Uni Podcasts',
+      });
+      navigator.mediaSession.setActionHandler('play', () => { audio.play(); isPlaying = true; updatePlayIcon(); });
+      navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); isPlaying = false; updatePlayIcon(); });
+      navigator.mediaSession.setActionHandler('previoustrack', () => loadTrack(currentIndex - 1));
+      navigator.mediaSession.setActionHandler('nexttrack', () => loadTrack(currentIndex + 1));
+      navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+      navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime = Math.min(audio.duration, audio.currentTime + 30); });
+    }
+  }
+
+  // ── File upload ──
+  const AUDIO_EXTS = ['mp3','m4a','wav','ogg','aac','flac','opus'];
+  function isAudioFile(file) {
+    if (file.type && file.type.startsWith('audio/')) return true;
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    return AUDIO_EXTS.includes(ext);
+  }
+
+  async function handleFiles(files) {
+    let added = 0;
+    for (const file of files) {
+      if (!isAudioFile(file)) continue;
+      const id = 'track_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      const name = file.name.replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ');
+      const url = URL.createObjectURL(file);
+      objectURLs[id] = url;
+
+      // Try IndexedDB, continue even if it fails (iOS may block it)
+      try { await saveFile(id, file); } catch(e) { console.warn('IndexedDB failed, memory only'); }
+
+      // Get duration with timeout fallback
+      const tmpAudio = new Audio(url);
+      await new Promise(res => {
+        tmpAudio.onloadedmetadata = res;
+        tmpAudio.onerror = res;
+        setTimeout(res, 3000);
+      });
+      const durationStr = fmt(tmpAudio.duration);
+
+      tracks.push({ id, name, durationStr });
+      saveTracks();
+      added++;
+    }
+    renderList();
+    if (added > 0) showToast(`${added} Episode(n) hinzugefügt ✓`);
+    else showToast('Keine Audiodatei erkannt');
+  }
+
+  function saveTracks() {
+    localStorage.setItem('lectio_tracks', JSON.stringify(tracks));
+  }
+
+  // ── Progress ──
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    progressFill.style.width = pct + '%';
+    progressThumb.style.left = pct + '%';
+    timeElapsed.textContent = fmt(audio.currentTime);
+    timeDuration.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', () => {
+    if (currentIndex < tracks.length - 1) {
+      loadTrack(currentIndex + 1);
+    } else {
+      isPlaying = false;
+      updatePlayIcon();
+    }
+  });
+
+  audio.addEventListener('play', () => { isPlaying = true; updatePlayIcon(); renderList(); });
+  audio.addEventListener('pause', () => { isPlaying = false; updatePlayIcon(); renderList(); });
+
+  // ── Progress tap ──
+  document.getElementById('progressWrap').addEventListener('click', e => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
+
+  // ── Controls ──
+  playPauseBtn.addEventListener('click', () => {
+    if (!audio.src) return;
+    if (isPlaying) { audio.pause(); } else { audio.play(); }
+  });
+
+  document.getElementById('rewindBtn').addEventListener('click', () => {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+  });
+
+  document.getElementById('forwardBtn').addEventListener('click', () => {
+    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30);
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', () => loadTrack(currentIndex - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => loadTrack(currentIndex + 1));
+
+  speedBtn.addEventListener('click', () => {
+    speedIdx = (speedIdx + 1) % speeds.length;
+    audio.playbackRate = speeds[speedIdx];
+    speedBtn.textContent = speeds[speedIdx].toFixed(2).replace('.00', '.0') + '×';
+    showToast(`Geschwindigkeit: ${speeds[speedIdx]}×`);
+  });
+
+  // ── Sleep Timer ──
+  document.getElementById('sleepBtn').addEventListener('click', () => {
+    const options = [15, 30, 45, 60];
+    if (sleepTimer) {
+      clearTimeout(sleepTimer);
+      sleepTimer = null;
+      document.getElementById('sleepBtn').textContent = 'Sleep';
+      showToast('Sleep-Timer deaktiviert');
+    } else {
+      const mins = options[Math.floor(Math.random() * 2)]; // cycle through
+      const cycleIdx = (document.getElementById('sleepBtn').dataset.ci || 0) % options.length;
+      const chosen = options[cycleIdx];
+      document.getElementById('sleepBtn').dataset.ci = parseInt(cycleIdx) + 1;
+      sleepTimer = setTimeout(() => {
+        audio.pause();
+        sleepTimer = null;
+        document.getElementById('sleepBtn').textContent = 'Sleep';
+        showToast('Sleep-Timer: Pause');
+      }, chosen * 60 * 1000);
+      document.getElementById('sleepBtn').textContent = `${chosen}min ✕`;
+      showToast(`Sleep in ${chosen} Minuten`);
+    }
+  });
+
+  // ── Upload zone ──
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+
+  uploadZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  // ── List clicks (delegated) ──
+  podcastList.addEventListener('click', e => {
+    const playBtn = e.target.closest('.item-play-btn');
+    const deleteBtn = e.target.closest('.item-delete');
+    const item = e.target.closest('.podcast-item');
+
+    if (deleteBtn) {
+      const id = deleteBtn.dataset.id;
+      const idx = tracks.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        if (currentIndex === idx) {
+          audio.pause();
+          audio.src = '';
+          isPlaying = false;
+          currentIndex = -1;
+          playerBar.classList.add('hidden');
+          playerSpacer.style.display = 'none';
+        } else if (currentIndex > idx) {
+          currentIndex--;
+        }
+        deleteFile(id);
+        if (objectURLs[id]) { URL.revokeObjectURL(objectURLs[id]); delete objectURLs[id]; }
+        tracks.splice(idx, 1);
+        saveTracks();
+        renderList();
+        showToast('Episode entfernt');
+      }
+      return;
+    }
+
+    if (item) {
+      const index = parseInt(item.dataset.index);
+      if (index === currentIndex) {
+        if (isPlaying) audio.pause(); else audio.play();
+      } else {
+        loadTrack(index);
+      }
+    }
+  });
+
+  // ── Keyboard (desktop) ──
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && e.target === document.body) {
+      e.preventDefault();
+      if (isPlaying) audio.pause(); else if (audio.src) audio.play();
+    }
+  });
+
+  // ── Start ──
+  init();
+</script>
+</body>
+</html>
